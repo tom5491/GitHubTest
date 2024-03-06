@@ -1,0 +1,89 @@
+name: Auto Merge UAT PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        required: true
+        description: 'Pull Request Number'
+  pull_request:
+    types: [opened,synchronize]
+    branches:
+      - UAT
+      - uat 
+
+jobs:
+  Auto-Merge-And-Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Now we install nodejs in the VM, and specify version 14
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+
+    - name: 'Checkout source code'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: 'Install Salesforce CLI'
+      run: |
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+          mkdir ~/sfdx
+          tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+          echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+          ~/sfdx/bin/sfdx version
+    
+    - name: 'Installing sfdx git delta'
+      run: |
+          echo y | sfdx plugins:install sfdx-git-delta
+          sfdx plugins
+
+    - name: 'Installing java'
+      run: |
+        sudo apt-get update
+        sudo apt install default-jdk
+
+    - name: 'Populate auth file with SFDX_URL secret of integration org'
+      shell: bash
+      run: |
+          echo ${{ secrets.SFDX_UAT_SECRET}} > ./SFDX_UAT_SECRET.txt
+    # Authenticate to org using the URL stored in the text file
+    - name: 'Authenticate to Integration Org'
+      run: sfdx auth:sfdxurl:store -f ./SFDX_UAT_SECRET.txt -s -a integration
+
+    - name: 'Create delta packages for new, modified or deleted metadata'
+      run: |
+          mkdir changed-sources
+          sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+
+    - name: 'Deploy-only deploy delta changes - run specified tests'
+      if: ${{ env.APEX_TESTS != 'all' }}
+      run: |
+          echo ${{env.APEX_TESTS}}
+          sfdx force:source:deploy -p "changed-sources" --testlevel RunLocalTests  --json
+    # If the env variable equals all, we run all tests
+    - name: 'Check-only deploy delta changes - run all tests'
+      if: ${{ env.APEX_TESTS == 'all' }}
+      run: |
+          sfdx force:source:deploy -p "changed-sources" --testlevel RunLocalTests  --json
+
+    - name: Merge Pull Request
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      uses: juliangruber/merge-pull-request-action@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        number: ${{ github.event.inputs.pull_request_number }}
+        method: squash # merge rebase
+        
+    - name: Merge Pull Request
+      if: ${{ github.event_name != 'workflow_dispatch' }}
+      uses: pascalgn/automerge-action@v0.14.3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MERGE_LABELS: ""
+        MERGE_METHOD: squash
+        MERGE_COMMIT_MESSAGE: pull-request-title
+        MERGE_FORKS: false
+        UPDATE_LABELS: ""
+        UPDATE_METHOD: rebase

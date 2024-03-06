@@ -1,0 +1,71 @@
+# Unique name for this workflow
+name: Create UAT Promotion Branch on PR Approval to UAT
+
+# Definition when the workflow should run
+on:
+    # The workflow will run whenever an event happens on a pull request
+  pull_request_review:
+      # The events are that a PR is closed
+      # to a branch that has an existing pull request
+      types: [submitted]
+      # The branches filter allows to specify that this workflow should only
+      # run if the branch name is "dev". This way we prevent this workflow
+      # from running when PRs are opened on other branches
+      branches:
+        - release/*
+      # We only care about changes to the force-app directory, which is the
+      # root directory of the sfdx project. This prevents the job from running
+      # when changing non-salesforce files (like this yml file).
+      paths:
+        - 'force-app/**'
+        # Jobs to be executed when the above conditions are met
+jobs:
+  Auto-Create-PR:
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    # As mentioned in the blog post, this job runs inside a VM. Here we
+    # can specify which OS this VM should run on.
+    # In this case, we are going to run our commands on the latest version
+    # of ubuntu
+    steps:
+        # Now we install nodejs in the VM, and specify version 14
+        - uses: actions/setup-node@v3
+          with:
+            node-version: '14'
+            # The idea is that the VM can access your remote repository
+        # because your repository is an sfdx project.
+        # This is a default action that allows us to enter the root
+        # directory of the repository
+        # Make sure to specify fetch-depth:0. This allows us to
+        # access previous commits that have been pushed to the repository.
+        # We'll need this later when we try to figure out which metadata has
+        # changed between commits, so that we can only deploy that metadata
+        # to the destination org
+        - name: 'Checkout Source Code'
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+      
+        # - name: Set Branch Name
+        #   id: vars
+        #   run: |
+        #     echo "::set-output name=branchname::UAT"
+        - name: Create Pull Request
+          id: cpr
+          #uses: peter-evans/create-pull-request@v5
+          uses: thomaseizinger/create-pull-request@1.3.1
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            title: "Auto-created PR to UAT"
+            body: "This PR was automatically created from PR #${{github.event.number}}. That PR was merging ${{github.event.pull_request.head_ref}} into ${{github.event.pull_request.base_ref}}"
+            head: ${{github.event.pull_request.head.ref}}
+            base: UAT
+
+        - name: Trigger UAT Deployment
+          env:
+            GH_TOKEN: ${{secrets.APPROVAL_PAT}}
+          id: trigger-uat
+          run: |
+            gh workflow list --all
+            # gh workflow run Merge.yml --ref main -f pull_request_number=${{steps.cpr.outputs.pull-request-number}}
+            
