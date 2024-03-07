@@ -63,9 +63,9 @@ jobs:
 
         - name: Trigger UAT Deployment
           env:
-            GH_TOKEN: ${{secrets.APPROVAL_PAT}}
+            GH_TOKEN: ${{ secrets.APPROVAL_PAT }}
           id: trigger-uat
           run: |
             gh workflow list --all
-            # gh workflow run Merge.yml --ref main -f pull_request_number=${{steps.cpr.outputs.pull-request-number}}
+            gh workflow run Merge.yml --ref main -f pull_request_number=${{steps.cpr.outputs.pull-request-number}}
             
