@@ -21,6 +21,9 @@ jobs:
       with:
         node-version: '14'
 
+    - name: 'Echo PR Number'
+      run: echo ${{ github.event.inputs.pull_request_number }}
+
     - name: 'Checkout source code'
       uses: actions/checkout@v3
       with:
