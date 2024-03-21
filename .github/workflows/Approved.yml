@@ -73,5 +73,5 @@ jobs:
           id: trigger-uat
           run: |
             gh workflow list --all
-            gh workflow run Merge.yml -f pull_request_number=${{steps.cpr.outputs.number}}
+            gh workflow run Merge.yml --ref main -f pull_request_number=${{steps.cpr.outputs.number}}
             
