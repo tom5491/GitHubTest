@@ -57,7 +57,7 @@ jobs:
           with:
             github_token: ${{ secrets.GITHUB_TOKEN }}
             title: "Auto-created PR to UAT"
-            body: "This PR was automatically created from PR #${{github.event.number}}. That PR was merging ${{github.event.pull_request.head_ref}} into ${{github.event.pull_request.base_ref}}"
+            body: "This PR was automatically created from PR #${{github.event.pull_request.number}}. That PR was merging ${{github.event.pull_request.head_ref}} into ${{github.event.pull_request.base_ref}}"
             head: ${{github.event.pull_request.head.ref}}
             base: UAT
 
