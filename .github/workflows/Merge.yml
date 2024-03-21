@@ -55,7 +55,12 @@ jobs:
     - name: 'Create delta packages for new, modified or deleted metadata'
       run: |
           mkdir changed-sources
-          sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+          git fetch origin
+          # Get the top commit of the source branch
+          SOURCE_COMMIT=$(git rev-parse origin/${{ github.event.inputs.pull_request_number }} | cut -c1-7)
+          # Get the top commit of the target branch
+          TARGET_COMMIT=$(git rev-parse origin/${{ github.event.inputs.pull_request_number }}^ | cut -c1-7)
+          sfdx sgd:source:delta --to "${TARGET_COMMIT}" --from "${SOURCE_COMMIT}" --output changed-sources/ --generate-delta --source force-app/
 
     - name: 'Deploy-only deploy delta changes - run specified tests'
       if: ${{ env.APEX_TESTS != 'all' }}
