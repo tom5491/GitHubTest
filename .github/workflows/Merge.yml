@@ -7,11 +7,11 @@ on:
         required: true
         description: 'Pull Request Number'
       
-  # pull_request:
-  #   types: [opened,synchronize]
-  #   branches:
-  #     - UAT
-  #     - uat 
+  pull_request:
+    types: [opened,synchronize]
+    branches:
+      - UAT
+      - uat 
 
 jobs:
   Auto-Merge-And-Deploy:
@@ -26,10 +26,16 @@ jobs:
       run: |
         echo "Pull Request Number: ${{ github.event.inputs.pull_request_number }}"
 
-    - name: 'Checkout source code'
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+    - name: 'Checkout pull request locally'
+      run: |
+        gh pr checkout ${{ github.event.inputs.pull_request_number }}
+
+        # Get the top commit of the source branch
+        SOURCE_COMMIT=$(git rev-parse HEAD | cut -c1-7)
+        # Get the top commit of the target branch
+        TARGET_COMMIT=$(git rev-parse HEAD^ | cut -c1-7)
+        echo "Source Commit: $SOURCE_COMMIT"
+        echo "Target Commit: $TARGET_COMMIT"
 
     - name: 'Install Salesforce CLI'
       run: |
@@ -60,11 +66,6 @@ jobs:
     - name: 'Create delta packages for new, modified or deleted metadata'
       run: |
           mkdir changed-sources
-          git fetch origin
-          # Get the top commit of the source branch
-          SOURCE_COMMIT=$(git rev-parse origin/${{ github.event.inputs.pull_request_number }} | cut -c1-7)
-          # Get the top commit of the target branch
-          TARGET_COMMIT=$(git rev-parse origin/${{ github.event.inputs.pull_request_number }}^ | cut -c1-7)
           sfdx sgd:source:delta --to "${TARGET_COMMIT}" --from "${SOURCE_COMMIT}" --output changed-sources/ --generate-delta --source force-app/
 
     - name: 'Deploy-only deploy delta changes - run specified tests'
