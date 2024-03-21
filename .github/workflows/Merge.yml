@@ -76,15 +76,16 @@ jobs:
     - name: 'Create delta packages for new, modified or deleted metadata'
       run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            source_branch=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref')
-            target_branch=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref')
+            source_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref')
+            target_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref')
           else
-            source_branch=${{ github.event.pull_request.head.ref }}
-            target_branch=${{ github.event.pull_request.base.ref }}
+            source_branch=feature/test1
+            target_branch=UAT
+          fi
 
           mkdir changed-sources
           git fetch origin
-          sfdx sgd:source:delta --to $target_branch --from $source_branch --output changed-sources/ --generate-delta --source force-app/
+          sfdx sgd:source:delta --to "${target_branch}" --from "${source_branch}" --output changed-sources/ --generate-delta --source force-app/
 
     - name: 'Deploy-only deploy delta changes - run specified tests'
       if: ${{ env.APEX_TESTS != 'all' }}
