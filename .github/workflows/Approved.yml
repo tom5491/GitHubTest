@@ -59,7 +59,7 @@ jobs:
             title: "Auto-created PR to UAT"
             body: |
               This PR was automatically created from PR #${{ env.original_pr_number }}.
-              That PR was merging ${{ env.original_pr_ref_head }} into ${{ env.original_pr_base_ref }}
+              That PR was merging ${{ env.original_pr_head_ref }} into ${{ env.original_pr_base_ref }}
             head: ${{github.event.pull_request.head.ref}}
             base: UAT
           env:
