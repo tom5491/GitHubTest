@@ -1,0 +1,29 @@
+<template>
+    <div class="slds-box slds-box_x-small slds-m-around_x-large">
+        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+            <h2 class="slds-text-title_caps">Login</h2>
+            <h2 class="slds-text-title_caps">Register</h2>
+        </div>
+        <div class="slds-form-element">
+            <label class="slds-form-element__label" for="email-input">Email address</label>
+            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right">
+                <input type="email" id="email-input" class="slds-input" value="name@example.com" readonly />
+                <span class="slds-icon_container slds-icon-utility-check slds-input__icon slds-input__icon_right">
+                    <lightning-icon icon-name="utility:check" size="x-small" class="slds-icon slds-icon_text-success"></lightning-icon>
+                </span>
+            </div>
+            <div class="slds-form-element__help">We'll never share your email with anyone else.</div>
+        </div>
+        <div class="slds-form-element">
+            <label class="slds-form-element__label" for="password-input">Password</label>
+            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right slds-has-error">
+                <input type="password" id="password-input" class="slds-input" value="Password" />
+                <span class="slds-icon_container slds-icon-utility-error slds-input__icon slds-input__icon_right">
+                    <lightning-icon icon-name="utility:error" size="x-small" class="slds-icon slds-icon_text-error"></lightning-icon>
+                </span>
+            </div>
+            <div class="slds-form-element__help slds-has-error">Password incorrect.</div>
+        </div>
+        <button class="slds-button slds-button_brand">Submit</button>
+    </div>
+</template>
