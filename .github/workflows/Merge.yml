@@ -63,8 +63,8 @@ jobs:
             echo "$source_branch"
             echo "$target_branch"
           else
-            source_branch=$(${{ github.event.pull_request.head.ref }} | tr -d '\n')
-            target_branch=$(${{ github.event.pull_request.base.ref }} | tr -d '\n')
+            source_branch=$(echo "${{ github.event.pull_request.head.ref }}" | tr -d '\n')
+            target_branch=$(echo "${{ github.event.pull_request.base.ref }}" | tr -d '\n')
             echo "$source_branch"
             echo "$target_branch"
           fi
