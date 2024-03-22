@@ -60,6 +60,8 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             source_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref' | tr -d '\n')
             target_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref' | tr -d '\n')
+            echo "$source_branch"
+            echo "$target_branch"
           else
             source_branch=${{ github.event.pull_request.head.ref }}
             target_branch=${{ github.event.pull_request.base.ref }}
