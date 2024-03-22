@@ -65,6 +65,8 @@ jobs:
           else
             source_branch=${{ github.event.pull_request.head.ref }}
             target_branch=${{ github.event.pull_request.base.ref }}
+            echo "$source_branch"
+            echo "$target_branch"
           fi
 
           mkdir changed-sources
