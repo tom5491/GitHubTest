@@ -71,7 +71,7 @@ jobs:
 
           mkdir changed-sources
           git fetch origin
-          sfdx sgd:source:delta --to $target_branch --from $source_branch --output changed-sources/ --generate-delta --source force-app/
+          sfdx sgd:source:delta --to "origin/$target_branch" --from "origin/$source_branch" --output changed-sources/ --generate-delta --source force-app/
     - name: 'Deploy-only deploy delta changes - run specified tests'
       if: ${{ env.APEX_TESTS != 'all' }}
       run: |
