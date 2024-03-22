@@ -15,24 +15,6 @@ jobs:
   Auto-Merge-And-Deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Extract branch names
-      run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          source_branch=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref')
-          target_branch=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref')
-        else
-          source_branch=${{ github.event.pull_request.head.ref }}
-          target_branch=${{ github.event.pull_request.base.ref }}
-        fi
-        echo "::set-output name=source_branch::$source_branch"
-        echo "::set-output name=target_branch::$target_branch"
-
-    - name: Use branch names
-      run: |
-        echo "Source branch: ${{ steps.extract_branches.outputs.source_branch }}"
-        echo "Target branch: ${{ steps.extract_branches.outputs.target_branch }}"
-        # Use these variables in subsequent steps as needed
-
       # Now we install nodejs in the VM, and specify version 14
     - uses: actions/setup-node@v3
       with:
@@ -76,8 +58,8 @@ jobs:
     - name: 'Create delta packages for new, modified or deleted metadata'
       run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            source_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref')
-            target_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref')
+            source_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.head.ref' | tr -d '\n')
+            target_branch=$(curl -s -H "Authorization: token ***" "https://api.github.com/repos/tom5491/GitHubTest/pulls/${{ github.event.inputs.pull_request_number }}" | jq -r '.base.ref' | tr -d '\n')
           else
             source_branch=${{ github.event.pull_request.head.ref }}
             target_branch=${{ github.event.pull_request.base.ref }}
